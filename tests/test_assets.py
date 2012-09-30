@@ -2,11 +2,14 @@ import codecs
 import os
 import sys
 
-from gears.assets import CircularDependencyError, Asset, StaticAsset, build_asset
+from gears.assets import (
+    CircularDependencyError, BaseAsset, Asset, StaticAsset, build_asset
+)
 from gears.compat import str, bytes
 from gears.environment import Environment
 from gears.finders import FileSystemFinder
 
+from mock import sentinel, Mock
 from unittest2 import TestCase
 
 
@@ -82,6 +85,23 @@ class StaticAssetTests(TestCase):
     def test_is_convertible_to_bytes(self):
         asset = get_static_asset('static_source')
         bytes(asset)
+
+
+class HexdigestPathTests(TestCase):
+
+    def get_asset(self, logical_path):
+        attributes = Mock(logical_path=logical_path)
+        asset = BaseAsset(attributes, sentinel.absolute_path)
+        asset.hexdigest = '123456'
+        return asset
+
+    def test_hexdigest_path(self):
+        def check(logical_path, result):
+            asset = self.get_asset(logical_path)
+            self.assertEqual(asset.hexdigest_path, result)
+
+        check('css/style.css', 'css/style.123456.css')
+        check('css/style.min.css', 'css/style.min.123456.css')
 
 
 class BuildAssetTests(TestCase):
