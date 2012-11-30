@@ -16,8 +16,15 @@ class UnicodeMixin(object):
 
 
 if is_py2:
+    import __builtin__ as builtins
+    from StringIO import StringIO
+
     bytes = str
     str = unicode
+
 elif is_py3:
+    import builtins
+    from io import StringIO
+
     bytes = bytes
     str = str
